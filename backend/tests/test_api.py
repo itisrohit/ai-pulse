@@ -27,3 +27,11 @@ def test_admin_cannot_see_other_org(client):
     headers, _ = login(client, "ravi@consult.test", "Bluepeak Retail")
     r = client.get("/dashboard?org_id=1", headers=headers)
     assert r.json()["organization"] == "Bluepeak Retail"
+
+
+def test_select_org_rejects_non_member(client):
+    # Priya is only in Northwind (id 1); asking for Bluepeak (id 2) must fail
+    _, data = login(client, "priya@northwind.test")
+    r = client.post("/auth/select-org", json={"org_id": 2},
+                    headers={"Authorization": f"Bearer {data['token']}"})
+    assert r.status_code == 403
