@@ -19,11 +19,42 @@ def test_admin_dashboard(client):
     org_id = data["organizations"][0]["org_id"]
     r = client.get(f"/dashboard?org_id={org_id}", headers=headers)
     assert r.status_code == 200
-    assert len(r.json()["departments"]) == 4
+    data = r.json()
+    # Support has 5 respondents; Sales, Engineering and HR have fewer and must be hidden
+    assert [d["department"] for d in data["departments"]] == ["Support"]
+    assert data["hidden_departments"] == ["Sales", "Engineering", "HR"]
 
 
 def test_admin_cannot_see_other_org(client):
-    headers, _ = login(client, "asha@northwind.test", "Northwind Logistics")
+    # Ravi is admin at Bluepeak; he asks for Northwind (id 1) and must still get Bluepeak
+    headers, _ = login(client, "ravi@consult.test", "Bluepeak Retail")
     r = client.get("/dashboard?org_id=1", headers=headers)
-    assert r.status_code == 200
-    assert "departments" in r.json()
+    assert r.json()["organization"] == "Bluepeak Retail"
+
+
+def test_select_org_rejects_non_member(client):
+    # Priya is only in Northwind (id 1); asking for Bluepeak (id 2) must fail
+    _, data = login(client, "priya@northwind.test")
+    r = client.post("/auth/select-org", json={"org_id": 2},
+                    headers={"Authorization": f"Bearer {data['token']}"})
+    assert r.status_code == 403
+
+
+def test_employee_can_delete_their_answers(client):
+    priya, _ = login(client, "priya@northwind.test", "Northwind Logistics")
+    admin, _ = login(client, "asha@northwind.test", "Northwind Logistics")
+    assert client.get("/dashboard", headers=admin).json()["departments"] != []
+
+    assert client.delete("/reports/me", headers=priya).status_code == 200
+
+    assert client.get("/reports/me", headers=priya).json()["answered"] == 0
+    # Support drops to 4 respondents, so it disappears from the dashboard straight away
+    assert client.get("/dashboard", headers=admin).json()["departments"] == []
+
+
+def test_report_gives_a_tip_for_each_risk(client):
+    # Priya's seeded answer was flagged for sharing customer data
+    headers, _ = login(client, "priya@northwind.test", "Northwind Logistics")
+    report = client.get("/reports/me", headers=headers).json()
+    assert report["risks"] == ["customer_data_shared"]
+    assert "Remove customer names" in report["risk_tips"][0]

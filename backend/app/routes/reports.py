@@ -15,6 +15,14 @@ NEXT_STEPS = {
     "manager": ["Agree an AI usage policy with your team", "Pick one workflow per quarter to improve with AI", "Track time saved, not tool licences"],
 }
 
+# A concrete "what to do" for each risk the AI can flag in someone's answer
+RISK_TIPS = {
+    "customer_data_shared": "Remove customer names, emails and order details before pasting anything into an AI tool.",
+    "confidential_data_shared": "Keep internal documents out of public AI tools; ask IT which tools are approved.",
+    "unreviewed_output": "Treat AI output as a first draft: check facts and numbers before you use it.",
+    "policy_unaware": "Read your company's AI policy so you know which tools and data are allowed.",
+}
+
 
 @router.get("/me")
 def my_report(m: models.Membership = Depends(current_membership), db: Session = Depends(get_db)):
@@ -29,5 +37,14 @@ def my_report(m: models.Membership = Depends(current_membership), db: Session = 
         "average_score": round(avg, 2) if avg is not None else None,
         "level": maturity_level(avg),
         "risks": flags,
+        "risk_tips": [RISK_TIPS[f] for f in flags if f in RISK_TIPS],
         "next_steps": NEXT_STEPS.get(m.job_role, NEXT_STEPS["manager"]),
     }
+
+
+@router.delete("/me")
+def delete_my_answers(m: models.Membership = Depends(current_membership), db: Session = Depends(get_db)):
+    """Right to delete (client request). Dashboards are calculated live, so this shows up immediately."""
+    deleted = db.query(models.Response).filter_by(membership_id=m.id).delete()
+    db.commit()
+    return {"deleted": deleted}
