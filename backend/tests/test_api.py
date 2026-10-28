@@ -23,7 +23,7 @@ def test_admin_dashboard(client):
 
 
 def test_admin_cannot_see_other_org(client):
-    headers, _ = login(client, "asha@northwind.test", "Northwind Logistics")
+    # Ravi is admin at Bluepeak; he asks for Northwind (id 1) and must still get Bluepeak
+    headers, _ = login(client, "ravi@consult.test", "Bluepeak Retail")
     r = client.get("/dashboard?org_id=1", headers=headers)
-    assert r.status_code == 200
-    assert "departments" in r.json()
+    assert r.json()["organization"] == "Bluepeak Retail"
