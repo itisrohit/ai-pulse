@@ -23,6 +23,12 @@ export default function Report() {
       <p>Average score: {report.average_score}</p>
       <h3>Risks</h3>
       <ul>{report.risks.map((r) => <li key={r}>{r}</li>)}</ul>
+      {report.risk_tips.length > 0 && (
+        <>
+          <h3>What to do about it</h3>
+          <ul>{report.risk_tips.map((t) => <li key={t}>{t}</li>)}</ul>
+        </>
+      )}
       <h3>Next steps</h3>
       <ul>{report.next_steps.map((s) => <li key={s}>{s}</li>)}</ul>
       <button onClick={deleteMyAnswers}>Delete my answers</button>

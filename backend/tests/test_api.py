@@ -50,3 +50,11 @@ def test_employee_can_delete_their_answers(client):
     assert client.get("/reports/me", headers=priya).json()["answered"] == 0
     # Support drops to 4 respondents, so it disappears from the dashboard straight away
     assert client.get("/dashboard", headers=admin).json()["departments"] == []
+
+
+def test_report_gives_a_tip_for_each_risk(client):
+    # Priya's seeded answer was flagged for sharing customer data
+    headers, _ = login(client, "priya@northwind.test", "Northwind Logistics")
+    report = client.get("/reports/me", headers=headers).json()
+    assert report["risks"] == ["customer_data_shared"]
+    assert "Remove customer names" in report["risk_tips"][0]
