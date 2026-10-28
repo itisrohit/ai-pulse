@@ -9,7 +9,10 @@ if os.path.exists(_env_path):
             k, v = line.split("=", 1)
             os.environ.setdefault(k.strip(), v.strip())
 
-SECRET_KEY = os.getenv("SECRET_KEY", "ai-pulse-dev-secret")
+# Anyone who knows this key can forge a login for any user, so there is no default
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError("Set SECRET_KEY in backend/.env (see .env.example)")
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./aipulse.db")
 AI_MODE = os.getenv("AI_MODE", "mock")  # "mock" or "live"
 LLM_API_URL = os.getenv("LLM_API_URL", "")
