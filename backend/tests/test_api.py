@@ -38,3 +38,15 @@ def test_select_org_rejects_non_member(client):
     r = client.post("/auth/select-org", json={"org_id": 2},
                     headers={"Authorization": f"Bearer {data['token']}"})
     assert r.status_code == 403
+
+
+def test_employee_can_delete_their_answers(client):
+    priya, _ = login(client, "priya@northwind.test", "Northwind Logistics")
+    admin, _ = login(client, "asha@northwind.test", "Northwind Logistics")
+    assert client.get("/dashboard", headers=admin).json()["departments"] != []
+
+    assert client.delete("/reports/me", headers=priya).status_code == 200
+
+    assert client.get("/reports/me", headers=priya).json()["answered"] == 0
+    # Support drops to 4 respondents, so it disappears from the dashboard straight away
+    assert client.get("/dashboard", headers=admin).json()["departments"] == []
