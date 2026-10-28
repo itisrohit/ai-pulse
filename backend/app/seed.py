@@ -18,6 +18,8 @@ PEOPLE_NORTHWIND = [
     ("Dev Malhotra", "dev@northwind.test", "Engineering", "employee", "engineering", "lead"),
     ("Sara Thomas", "sara@northwind.test", "Engineering", "employee", "engineering", "mid"),
     ("Imran Khan", "imran@northwind.test", "HR", "employee", "manager", "senior"),
+    ("Anil Kumar", "anil@northwind.test", "Support", "employee", "support", "mid"),
+    ("Fatima Sheikh", "fatima@northwind.test", "Support", "employee", "support", "senior"),
 ]
 PEOPLE_BLUEPEAK = [
     ("Meera Pillai", "meera@bluepeak.test", None, "admin", "manager", "lead"),
@@ -80,6 +82,11 @@ def run():
     answer("vikram@northwind.test", nw, "common-open", "Used ChatGPT to draft 20 follow-up emails and edited each one.", 4, "Regular use with editing.", [])
     answer("priya@northwind.test", nw, "common-freq", "A few times a month", 2)
     answer("priya@northwind.test", nw, "common-open", "Pasted a customer's complaint thread into ChatGPT to summarise it.", 3, "Useful summary but shared customer data.", ["customer_data_shared"])
+    # Support reaches 5 respondents, so it is shown on the dashboard; smaller teams are hidden
+    answer("arjun@northwind.test", nw, "common-freq", "Daily", 4)
+    answer("kavitha@northwind.test", nw, "common-freq", "A few times a week", 3)
+    answer("anil@northwind.test", nw, "common-freq", "A few times a week", 3)
+    answer("fatima@northwind.test", nw, "common-freq", "Many times a day, it's part of how I work", 5)
     answer("tom@bluepeak.test", bp, "common-freq", "A few times a week", 3)
     answer("kabir@bluepeak.test", bp, "common-open", "Uploaded our full customer refund list to an AI tool to find patterns.", 3, "Good idea, unsafe data handling.", ["customer_data_shared", "confidential_data_shared"])
     answer("kabir@bluepeak.test", bp, "common-freq", "Daily", 4)

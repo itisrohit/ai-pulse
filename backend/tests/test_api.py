@@ -19,7 +19,10 @@ def test_admin_dashboard(client):
     org_id = data["organizations"][0]["org_id"]
     r = client.get(f"/dashboard?org_id={org_id}", headers=headers)
     assert r.status_code == 200
-    assert len(r.json()["departments"]) == 4
+    data = r.json()
+    # Support has 5 respondents; Sales, Engineering and HR have fewer and must be hidden
+    assert [d["department"] for d in data["departments"]] == ["Support"]
+    assert data["hidden_departments"] == ["Sales", "Engineering", "HR"]
 
 
 def test_admin_cannot_see_other_org(client):
