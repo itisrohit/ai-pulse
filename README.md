@@ -144,11 +144,15 @@ I found these by reading the code and calling the running API with the demo acco
 
 ## How I used AI tools
 
-*(Draft: edit this into your own words before submitting.)*
+I mainly used an AI assistant to **understand** the codebase:
+- walking through the request flow (login → select org → diagnostic → scoring → report/dashboard) and the data model, especially why roles live on `Membership` and not on `User`
+- explaining syntax I wasn't sure about
+- probing the running API with scripted requests to confirm which bugs were real
+- discussing which fixes mattered most and what to leave, so I only kept changes I understood
 
-I used an AI coding assistant throughout: to walk through the unfamiliar codebase with me, to probe the running API for bugs with scripted requests, and to write most of the code changes and tests, which I reviewed before committing.
+The code changes were then made with the assistant, in small steps. I made it keep each change to a few lines, reviewed every diff, and checked the tests before committing.
 
 **Where it got it wrong:**
-- **It over-built.** Its first pass was nine commits and roughly 350 lines: a pooling algorithm for small teams, a defensive JSON parser, a personalised next-steps engine and around 50 tests. It worked, but it was more than I could explain or maintain, which goes against "build only what you understand". I deleted all of it and redid the fixes as small changes, about 80 lines of app code and a handful of tests.
-- **It gave me a wrong command.** It told me to run `gh repo fork ElevanteAI/ai-pulse --remote`, which fails because `--remote` can't be combined with a repo name. Even the corrected command didn't rewire `origin`, so I fixed the remotes by hand.
-- **Its audit script gave a false pass.** It reported "resubmitting replaces old answers" as passing, but that was only because the number of stored rows happened to equal its threshold. The duplicates were still there. A passing check isn't proof unless it tests the right thing.
+- **It wrote too much code.** Its first attempt was about 350 lines, more than I could explain. I deleted it and redid the fixes in about 80 lines.
+- **It gave me a wrong git command** for forking the repo, so I had to fix the remotes by hand.
+- **One of its checks passed by luck.** A check said duplicate answers were fixed, but they weren't. The number just happened to match.
